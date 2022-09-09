@@ -8,16 +8,16 @@ Seneca({ legacy: false })
     // debug: true,
     file: [__dirname + '/local-env.js;?'],
     var: {
-      $TRELLO_APIKEY: String,
-      $TRELLO_USERTOKEN: String,
+      $TANGOCARD_KEY: String,
+      $TANGOCARD_NAME: String,
     }
   })
   .use('provider', {
     provider: {
-      trello: {
+      tangocard: {
         keys: {
-          apikey: { value: '$TRELLO_APIKEY' },
-          usertoken: { value: '$TRELLO_USERTOKEN' },
+          key: { value: '$TANGOCARD_KEY' },
+          name: { value: '$TANGOCARD_NAME' },
         }
       }
     }
@@ -26,11 +26,11 @@ Seneca({ legacy: false })
   .ready(async function() {
     const seneca = this
 
-    console.log('SDK:', seneca.export('TrelloProvider/sdk')())
+    console.log('SDK:', seneca.export('TangocardProvider/sdk')())
 
-    console.log(await seneca.post('sys:provider,provider:trello,get:info'))
+    console.log(await seneca.post('sys:provider,provider:tangocard,get:info'))
     
-    const list = await seneca.entity("provider/trello/board").list$()
+    const list = await seneca.entity("provider/tangocard/board").list$()
     console.log(list.slice(0,3))
   })
 

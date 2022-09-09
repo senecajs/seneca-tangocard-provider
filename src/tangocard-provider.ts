@@ -2,29 +2,29 @@
 
 const Pkg = require('../package.json')
 
-const Trello = require('trello')
+const Tangocard = require('tangocard')
 
 
-type TrelloProviderOptions = {}
+type TangocardProviderOptions = {}
 
-function TrelloProvider(this: any, _options: TrelloProviderOptions) {
+function TangocardProvider(this: any, _options: TangocardProviderOptions) {
   const seneca: any = this
 
   const entityBuilder = this.export('provider/entityBuilder')
 
 
   seneca
-    .message('sys:provider,provider:trello,get:info', get_info)
+    .message('sys:provider,provider:tangocard,get:info', get_info)
 
 
   async function get_info(this: any, _msg: any) {
     return {
       ok: true,
-      name: 'trello',
+      name: 'tangocard',
       version: Pkg.version,
       sdk: {
-        name: 'trello',
-        version: Pkg.dependencies['trello'],
+        name: 'tangocard',
+        version: Pkg.dependencies['tangocard'],
       }
     }
   }
@@ -32,7 +32,7 @@ function TrelloProvider(this: any, _options: TrelloProviderOptions) {
 
   entityBuilder(this, {
     provider: {
-      name: 'trello'
+      name: 'tangocard'
     },
     entity: {
       board: {
@@ -109,11 +109,11 @@ function TrelloProvider(this: any, _options: TrelloProviderOptions) {
     // TODO: define sys:provider,get:keys to get all the keys?
 
     let apikey =
-      await this.post('sys:provider,get:key,provider:trello,key:apikey')
+      await this.post('sys:provider,get:key,provider:tangocard,key:apikey')
     let usertoken =
-      await this.post('sys:provider,get:key,provider:trello,key:usertoken')
+      await this.post('sys:provider,get:key,provider:tangocard,key:usertoken')
 
-    this.shared.sdk = new Trello(apikey.value, usertoken.value)
+    this.shared.sdk = new Tangocard(apikey.value, usertoken.value)
   })
 
 
@@ -126,17 +126,17 @@ function TrelloProvider(this: any, _options: TrelloProviderOptions) {
 
 
 // Default options.
-const defaults: TrelloProviderOptions = {
+const defaults: TangocardProviderOptions = {
 
   // TODO: Enable debug logging
   debug: false
 }
 
 
-Object.assign(TrelloProvider, { defaults })
+Object.assign(TangocardProvider, { defaults })
 
-export default TrelloProvider
+export default TangocardProvider
 
 if ('undefined' !== typeof (module)) {
-  module.exports = TrelloProvider
+  module.exports = TangocardProvider
 }
