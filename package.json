@@ -1,6 +1,6 @@
 {
   "name": "@seneca/tangocard-provider",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "main": "dist/tangocard-provider.js",
   "type": "commonjs",
   "types": "dist/tangocard-provider.d.ts",
@@ -42,13 +42,14 @@
   "dependencies": {
   },
   "peerDependencies": {
+    "@seneca/env": ">=0.2",
+    "@seneca/provider": ">=0.6",
     "seneca": ">=3",
     "seneca-entity": ">=18",
-    "seneca-promisify": ">=3",
-    "@seneca/provider": ">=0.6",
-    "@seneca/env": ">=0.2"
+    "seneca-promisify": ">=3"
   },
   "devDependencies": {
+    "node-fetch": "^2",
     "@seneca/doc": "^4.1.0",
     "@types/jest": "^29.0.0",
     "@types/node": "^18.7.16",

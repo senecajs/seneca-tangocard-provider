@@ -1,4 +1,11 @@
+
+// IMPORTANT: assumes node-fetch@2
+const Fetch = require('node-fetch')
+
 const Seneca = require('seneca')
+
+global.fetch = Fetch
+
 
 Seneca({ legacy: false })
   .test()
@@ -10,6 +17,8 @@ Seneca({ legacy: false })
     var: {
       $TANGOCARD_KEY: String,
       $TANGOCARD_NAME: String,
+      $TANGOCARD_CUSTID: String,
+      $TANGOCARD_ACCID: String,
     }
   })
   .use('provider', {
@@ -18,19 +27,63 @@ Seneca({ legacy: false })
         keys: {
           key: { value: '$TANGOCARD_KEY' },
           name: { value: '$TANGOCARD_NAME' },
+          cust: { value: '$TANGOCARD_CUSTID' },
+          acc: { value: '$TANGOCARD_ACCID' },
         }
       }
     }
   })
-  .use('../')
+  .use('../',{
+  })
   .ready(async function() {
     const seneca = this
 
-    console.log('SDK:', seneca.export('TangocardProvider/sdk')())
-
     console.log(await seneca.post('sys:provider,provider:tangocard,get:info'))
     
-    const list = await seneca.entity("provider/tangocard/board").list$()
-    console.log(list.slice(0,3))
+    const brands = await seneca.entity("provider/tangocard/brand").list$({
+      country: 'IE', verbose: false
+    })
+    console.log('brands',brands.length)
+    // console.dir(brands,{depth:null})
+    
+    let customers = await seneca.entity("provider/tangocard/customer").list$()
+    console.log('customers', customers.length)
+    console.dir(customers,{depth:null})
+    
+    let orders = await seneca.entity('provider/tangocard/order').list$()
+    console.log('orders',orders.length)
+
+    return;
+    
+    let mark = Math.random()+''
+    let utid = 'U768452'
+    
+    let order = seneca.entity('provider/tangocard/order').data$({
+      amount: 10,
+      // campaign: 'test01',
+      campaign: '',
+      emailSubject: 'subject '+mark,
+      etid: 'E000000',
+      externalRefID: seneca.util.Nid(),
+      message: 'msg '+mark,
+      notes: 'note '+mark,
+      recipient: {
+        email: 'richard+tangocard.test.01@ricebridge.com',
+        firstName: 'First',
+        lastName: ''
+      },
+      sendEmail: true,
+      sender: {
+        email: '',
+        firstName: '',
+        lastName: ''
+      },
+      utid
+    })
+
+    order = await order.save$()
+
+    console.log('order',order)
+
   })
 
