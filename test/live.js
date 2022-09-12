@@ -4,7 +4,7 @@ const Fetch = require('node-fetch')
 
 const Seneca = require('seneca')
 
-global.fetch = Fetch
+// global.fetch = Fetch
 
 
 Seneca({ legacy: false })
@@ -34,6 +34,19 @@ Seneca({ legacy: false })
     }
   })
   .use('../',{
+    fetch: Fetch,
+    entity: {
+      order: {
+        save: {
+          sendEmail: true,
+          sender: {
+            email: 'richard+tangocard.sender.01@ricebridge.com',
+            firstName: 'Sender',
+            lastName: ''
+          }
+        }
+      }
+    }
   })
   .ready(async function() {
     const seneca = this
@@ -53,7 +66,6 @@ Seneca({ legacy: false })
     let orders = await seneca.entity('provider/tangocard/order').list$()
     console.log('orders',orders.length)
 
-    return;
     
     let mark = Math.random()+''
     let utid = 'U768452'
@@ -72,18 +84,24 @@ Seneca({ legacy: false })
         firstName: 'First',
         lastName: ''
       },
-      sendEmail: true,
-      sender: {
-        email: '',
-        firstName: '',
-        lastName: ''
-      },
+      // sendEmail: true,
+      // sender: {
+      //   email: '',
+      //   firstName: '',
+      //   lastName: ''
+      // },
       utid
     })
 
-    order = await order.save$()
-
-    console.log('order',order)
+    try {
+      order = await order.save$()
+      console.log('order',order)
+    }
+    catch(e) {
+      console.log(e.message)
+      console.log(e.status)
+      console.log(e.body)
+    }
 
   })
 

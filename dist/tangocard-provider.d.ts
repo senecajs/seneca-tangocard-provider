@@ -1,5 +1,7 @@
 declare type TangocardProviderOptions = {
     url: string;
+    fetch: any;
+    entity: Record<string, any>;
     debug: boolean;
 };
 declare function TangocardProvider(this: any, options: TangocardProviderOptions): {

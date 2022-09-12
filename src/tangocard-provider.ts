@@ -1,13 +1,13 @@
 /* Copyright © 2022 Seneca Project Contributors, MIT License. */
 
 
-// IMPORTANT: provide `fetch` as a global externally
-
 const Pkg = require('../package.json')
 
 
 type TangocardProviderOptions = {
   url: string
+  fetch: any
+  entity: Record<string, any>
   debug: boolean
 }
 
@@ -48,7 +48,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
 
 
   const getJSON = async (url: string, config?: any) => {
-    let res = await fetch(url, config)
+    let res = await options.fetch(url, config)
 
     if (200 == res.status) {
       let json: any = await res.json()
@@ -71,7 +71,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
 
     config.method = config.method || 'POST'
 
-    let res = await fetch(url, config)
+    let res = await options.fetch(url, config)
 
     if (200 <= res.status && res.status < 300) {
       let json: any = await res.json()
@@ -79,7 +79,13 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
     }
     else {
       let err: any = new Error('TangocardProvider ' + res.status)
-      err.body = await res.text()
+      try {
+        err.body = await res.json()
+      }
+      catch (e: any) {
+        err.body = await res.text()
+      }
+      err.status = res.status
       throw err
     }
   }
@@ -139,20 +145,24 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
           },
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let body = {
-                ...this.shared.primary,
-                ...msg.ent.data$(false)
-              }
+              let body = this.util.deep(
+                this.shared.primary,
+                options.entity.order.save,
+                msg.ent.data$(false)
+              )
 
+              console.log('TANGO SAVE ORDER')
               console.dir(body)
 
               let json: any = await postJSON(makeUrl('orders', msg.q), makeConfig({
                 body
               }))
 
+              console.log('TANGO SAVE ORDER RES')
               console.dir(json)
 
-              let order = {}
+              let order = json
+              order.id = order.referenceOrderID
               return entize(order)
             },
           }
@@ -235,6 +245,17 @@ const defaults: TangocardProviderOptions = {
 
   // NOTE: include trailing /
   url: 'https://integration-api.tangocard.com/raas/v2/',
+
+  // Use global fetch by default - if exists
+  fetch: ('undefined' === typeof fetch ? undefined : fetch),
+
+  entity: {
+    order: {
+      save: {
+        // Default fields
+      }
+    }
+  },
 
   // TODO: Enable debug logging
   debug: false
