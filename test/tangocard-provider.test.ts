@@ -27,8 +27,6 @@ describe('tangocard-provider', () => {
     expect(TangocardProviderDoc).toBeDefined()
 
     const seneca = await makeSeneca()
-    let sdk = seneca.export('TangocardProvider/sdk')()
-    expect(sdk).toBeDefined()
 
     expect(await seneca.post('sys:provider,provider:tangocard,get:info'))
       .toMatchObject({
@@ -44,6 +42,7 @@ describe('tangocard-provider', () => {
   })
 
 
+  /*
   test('board-basic', async () => {
     if (!Config) return;
     const seneca = await makeSeneca()
@@ -66,6 +65,7 @@ describe('tangocard-provider', () => {
     expect(board0u.desc).toEqual(board0r.desc)
 
   })
+  */
 })
 
 
@@ -80,6 +80,8 @@ async function makeSeneca() {
       var: {
         $TANGOCARD_KEY: String,
         $TANGOCARD_NAME: String,
+        $TANGOCARD_CUSTID: String,
+        $TANGOCARD_ACCID: String,
       }
     })
     .use('provider', {
@@ -88,6 +90,8 @@ async function makeSeneca() {
           keys: {
             key: { value: '$TANGOCARD_KEY' },
             name: { value: '$TANGOCARD_NAME' },
+            cust: { value: '$TANGOCARD_CUSTID' },
+            acc: { value: '$TANGOCARD_ACCID' },
           }
         }
       }

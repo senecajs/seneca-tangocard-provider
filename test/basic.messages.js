@@ -14,10 +14,6 @@ module.exports = {
         ok: true,
         name: 'tangocard',
         version: Pkg.version,
-        sdk: {
-          name: 'tangocard',
-          version: Pkg.dependencies['tangocard'],
-        }
       },
     }
   ]
