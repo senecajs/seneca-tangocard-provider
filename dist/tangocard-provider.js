@@ -36,7 +36,7 @@ function TangocardProvider(options) {
         else {
             let err = new Error('TangocardProvider ' + res.status);
             err.tangocardResponse = res;
-            throw new err;
+            throw err;
         }
     };
     const postJSON = async (url, config) => {

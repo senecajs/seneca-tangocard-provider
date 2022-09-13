@@ -57,7 +57,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
     else {
       let err: any = new Error('TangocardProvider ' + res.status)
       err.tangocardResponse = res
-      throw new err
+      throw err
     }
   }
 

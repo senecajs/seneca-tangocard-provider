@@ -1,6 +1,6 @@
 {
   "name": "@seneca/tangocard-provider",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "dist/tangocard-provider.js",
   "type": "commonjs",
   "types": "dist/tangocard-provider.d.ts",
