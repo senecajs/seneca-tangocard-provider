@@ -1,4 +1,4 @@
-/* Copyright © 2022 Seneca Project Contributors, MIT License. */
+/* Copyright © 2022-2023 Seneca Project Contributors, MIT License. */
 
 
 const Pkg = require('../package.json')
@@ -15,30 +15,22 @@ type TangocardProviderOptions = {
 function TangocardProvider(this: any, options: TangocardProviderOptions) {
   const seneca: any = this
 
-  const entityBuilder = this.export('provider/entityBuilder')
+  const makeUtils = this.export('provider/makeUtils')
+
+  const {
+    makeUrl,
+    getJSON,
+    postJSON,
+    entityBuilder
+  } = makeUtils({
+    name: 'tangocard',
+    url: options.url,
+  })
 
 
   seneca
     .message('sys:provider,provider:tangocard,get:info', get_info)
 
-
-  const makeUrl = (suffix: string, q: any) => {
-    let url = options.url + suffix
-    if (q) {
-      if ('string' === typeof q) {
-        url += '/' + encodeURIComponent(q)
-      }
-      else if ('object' === typeof q && 0 < Object.keys(q).length) {
-        url += '?' + Object
-          .entries(q)
-          .reduce(((u: any, kv: any) =>
-            (u.append(kv[0], kv[1]), u)), new URLSearchParams())
-          .toString()
-
-      }
-    }
-    return url
-  }
 
   const makeConfig = (config?: any) => seneca.util.deep({
     headers: {
@@ -46,49 +38,6 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
     }
   }, config)
 
-
-  const getJSON = async (url: string, config?: any) => {
-    let res = await options.fetch(url, config)
-
-    if (200 == res.status) {
-      let json: any = await res.json()
-      return json
-    }
-    else {
-      let err: any = new Error('TangocardProvider ' + res.status)
-      err.tangocardResponse = res
-      throw err
-    }
-  }
-
-
-  const postJSON = async (url: string, config: any) => {
-    config.body = 'string' === typeof config.body ? config.body :
-      JSON.stringify(config.body)
-
-    config.headers['Content-Type'] = config.headers['Content-Type'] ||
-      'application/json'
-
-    config.method = config.method || 'POST'
-
-    let res = await options.fetch(url, config)
-
-    if (200 <= res.status && res.status < 300) {
-      let json: any = await res.json()
-      return json
-    }
-    else {
-      let err: any = new Error('TangocardProvider ' + res.status)
-      try {
-        err.body = await res.json()
-      }
-      catch (e: any) {
-        err.body = await res.text()
-      }
-      err.status = res.status
-      throw err
-    }
-  }
 
 
   async function get_info(this: any, _msg: any) {
@@ -109,7 +58,8 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('customers', msg.q), makeConfig())
+              let json: any =
+                await getJSON(makeUrl('customers', msg.q), makeConfig())
               let customers = json
               let list = customers.map((data: any) => entize(data))
               return list
@@ -121,7 +71,8 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('catalogs', msg.q), makeConfig())
+              let json: any =
+                await getJSON(makeUrl('catalogs', msg.q), makeConfig())
               let brands = json.brands
               let list = brands.map((data: any) => entize(data))
               return list
@@ -133,7 +84,8 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('orders', msg.q), makeConfig())
+              let json: any =
+                await getJSON(makeUrl('orders', msg.q), makeConfig())
               let orders = json.orders
               let list = orders.map((data: any) => entize(data))
 
@@ -151,15 +103,10 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
                 msg.ent.data$(false)
               )
 
-              console.log('TANGO SAVE ORDER')
-              console.dir(body)
-
-              let json: any = await postJSON(makeUrl('orders', msg.q), makeConfig({
-                body
-              }))
-
-              console.log('TANGO SAVE ORDER RES')
-              console.dir(json)
+              let json: any =
+                await postJSON(makeUrl('orders', msg.q), makeConfig({
+                  body
+                }))
 
               let order = json
               order.id = order.referenceOrderID
@@ -169,39 +116,6 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
         }
       }
     }
-
-    // save: {
-    //   action: async function(this: any, entize: any, msg: any) {
-    //     let ent = msg.ent
-    //     try {
-    //       let res
-    //       if (ent.id) {
-    //         // TODO: util to handle more fields
-    //         res = await this.shared.sdk.updateBoard(ent.id, {
-    //           desc: ent.desc
-    //         })
-    //       }
-    //       else {
-    //         // TODO: util to handle more fields
-    //         let fields = {
-    //           name: ent.name,
-    //           desc: ent.desc,
-    //         }
-    //         res = await this.shared.sdk.addBoard(fields)
-    //       }
-
-    //       return entize(res)
-    //     }
-    //     catch (e: any) {
-    //       if (e.message.includes('invalid id')) {
-    //         return null
-    //       }
-    //       else {
-    //         throw e
-    //       }
-    //     }
-    //   }
-    // }
   })
 
 
@@ -231,10 +145,6 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
 
   return {
     exports: {
-      makeUrl,
-      makeConfig,
-      getJSON,
-      postJSON,
     }
   }
 }

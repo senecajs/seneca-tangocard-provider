@@ -2,6 +2,7 @@
 
 import * as Fs from 'fs'
 
+// const Fetch = require('node-fetch')
 
 
 const Seneca = require('seneca')
@@ -42,30 +43,16 @@ describe('tangocard-provider', () => {
   })
 
 
-  /*
-  test('board-basic', async () => {
+  test('list-brand', async () => {
     if (!Config) return;
     const seneca = await makeSeneca()
 
-    const list = await seneca.entity("provider/tangocard/board").list$()
+    const list = await seneca.entity("provider/tangocard/brand").list$()
+    // console.log('BRANDS', list)
+
     expect(list.length > 0).toBeTruthy()
-
-    const board0 = await seneca.entity("provider/tangocard/board")
-      .load$(Config.board0.id)
-    expect(board0.name).toContain('Welcome Board')
-
-    board0.desc = 'DESC:' + Math.random()
-    let board0r = await board0.save$()
-    expect(board0r.id).toEqual(board0.id)
-    expect(board0r.desc).toEqual(board0.desc)
-
-    const board0u = await seneca.entity("provider/tangocard/board")
-      .load$(Config.board0.id)
-    expect(board0u.name).toContain('Welcome Board')
-    expect(board0u.desc).toEqual(board0r.desc)
-
   })
-  */
+
 })
 
 
@@ -96,7 +83,9 @@ async function makeSeneca() {
         }
       }
     })
-    .use(TangocardProvider)
+    .use(TangocardProvider, {
+      // fetch: Fetch,
+    })
 
   return seneca.ready()
 }
