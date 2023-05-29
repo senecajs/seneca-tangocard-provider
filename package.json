@@ -14,7 +14,7 @@
   "author": "Richard Rodger - richardrodger.com",
   "repository": {
     "type": "git",
-    "url": "git://tangocard.com/senecajs/seneca-tangocard-provider.git"
+    "url": "git://github.com/senecajs/seneca-tangocard-provider.git"
   },
   "scripts": {
     "test": "jest --coverage",
