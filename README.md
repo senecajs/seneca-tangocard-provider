@@ -16,16 +16,17 @@
 Provides access to the Tangocard API using the Seneca *provider*
 convention. Tangocard API entities are represented as Seneca entities so
 that they can be accessed using the Seneca entity API and messages.
-See [seneca-entity](senecajs/seneca-entity) and the [Seneca Data
+See [@seneca/entity](https://github.com/senecajs/seneca-entity) and the [Seneca Data
 Entities
 Tutorial](https://senecajs.org/docs/tutorials/understanding-data-entities.html) for more details on the Seneca entity API.
-NOTE: underlying third party SDK needs to be replaced as out of date and has a security issue.
 
 
 ## Install
 
+Requires Seneca 4 and Node.js 24 or later.
+
 ```sh
-$ npm install @seneca/tangocard-provider @seneca/env
+$ npm install seneca@^4 @seneca/entity @seneca/provider @seneca/env @seneca/tangocard-provider
 ```
 
 
@@ -36,37 +37,47 @@ $ npm install @seneca/tangocard-provider @seneca/env
 
 ```js
 
-// Setup - get the key value (<SECRET>) separately from a vault or
+// Setup - get the key values (<SECRET>) separately from a vault or
 // environment variable.
-Seneca()
-  // Get API keys using the seneca-env plugin
-  .use('env', {
+const seneca = Seneca()
+  .use('@seneca/entity')
+  // Get API keys using the @seneca/env plugin
+  .use('@seneca/env', {
     var: {
-      $TANGOCARD_APIKEY: String,
-      $TANGOCARD_USERTOKEN: String,
+      $TANGOCARD_NAME: String,
+      $TANGOCARD_KEY: String,
+      $TANGOCARD_CUSTID: String,
+      $TANGOCARD_ACCID: String,
     }
   })
-  .use('provider', {
+  .use('@seneca/provider', {
     provider: {
       tangocard: {
         keys: {
-          apikey: { value: '$TANGOCARD_APIKEY' },
-          usertoken: { value: '$TANGOCARD_USERTOKEN' },
+          name: { value: '$TANGOCARD_NAME' },
+          key: { value: '$TANGOCARD_KEY' },
+          cust: { value: '$TANGOCARD_CUSTID' },
+          acc: { value: '$TANGOCARD_ACCID' },
         }
       }
     }
   })
-  .use('tangocard-provider')
+  .use('@seneca/tangocard-provider')
 
-let board = await seneca.entity('provider/tangocard/board')
-  .load$('<tangocard-board-id>')
+await seneca.ready()
 
-Console.log('BOARD', board)
+// The brand catalog.
+let brands = await seneca.entity('provider/tangocard/brand').list$()
 
-board.desc = 'New description'
-board = await board.save$()
+// Order a reward; the customer and account come from the keys.
+let order = await seneca.entity('provider/tangocard/order').data$({
+  amount: 10,
+  utid: '<reward-utid>',
+  recipient: { email: 'alice@example.com', firstName: 'Alice', lastName: '' },
+  sendEmail: true,
+}).save$()
 
-Console.log('UPDATED BOARD', board)
+console.log('ORDER', order.referenceOrderID)
 
 ```
 
